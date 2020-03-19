@@ -13,22 +13,22 @@ int main(int argc , char *argv[])
     fd_set readfds;
      
     //a test message
-    const char *message = std::string( "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nConnection: keep-alive\r\n\n <html><head><h1>HELLO, BITCH!</h1></head><body></body></html>").c_str();
+    /*const*/ char *message = /*std::string(*/ "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nConnection: keep-alive\r\n\n <html><head><h1>HELLO, FROM SERVER, MY FRIEND!</h1></head><body><h2>Made by:</h2><p>Naydenovich, Kolesnokov, Zaika</p></body></html>"/*).c_str()*/;
  
-    //initialise all client_socket[] to 0 so not checked
+    //initialise all client_socket[] to 0 (as not checked)
     for (i = 0; i < max_clients; i++) 
     {
         client_socket[i] = 0;
     }
      
-    //create a master socket
+    //create a master_socket
     if( (master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0) 
     {
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
  
-    //set master socket to allow multiple connections
+    //set master_socket to allow multiple connections
     if( setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0 )
     {
         perror("setsockopt");
@@ -40,7 +40,7 @@ int main(int argc , char *argv[])
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons( PORT );
      
-    //bind the socket to localhost port 8888
+    //bind the socket to localhost port
     if (bind(master_socket, (struct sockaddr *)&address, sizeof(address)) < 0) 
     {
         perror("bind failed");

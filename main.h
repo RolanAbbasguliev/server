@@ -11,6 +11,6 @@
 
 #define TRUE   1
 #define FALSE  0
-#define PORT 8888
+#define PORT 1234
 
-int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client_socket, sockaddr_in address, int addrlen, const char* message, char* buffer);
+int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client_socket, sockaddr_in address, int addrlen, /*const*/ char* message, char* buffer);
