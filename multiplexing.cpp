@@ -1,8 +1,14 @@
 #include "main.h"
 
-int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client_socket, struct sockaddr_in address, int addrlen, /*const*/ char* message, char* buffer)
+char buffer_[2049];
+int count_of_connections = -1;
+
+int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client_socket, struct sockaddr_in address, int addrlen, /*const*/ char* message)
 {
     int activity, valread, sd, max_sd, i, new_socket;
+    sock_to_reqStruct StRs[MAXIMUM_CONNECTIONS];
+
+    memset(&buffer_, 0, sizeof(buffer_));
 
 	while(TRUE) 
     {
@@ -33,7 +39,7 @@ int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client
    
         if ((activity < 0) && (errno!=EINTR)) 
         {
-            printf("select error");
+            errors_log("SELECT FAILED!");
         }
          
         //If something happened on the master socket , then its an incoming connection
@@ -41,20 +47,17 @@ int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client
         {
             if ((new_socket = accept(master_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
             {
-                perror("accept");
+                errors_log("ACCEPT FAILED!");
                 exit(EXIT_FAILURE);
             }
-         
-            //inform user of socket number - used in send and receive commands
-            printf("New connection , socket fd is %d , ip is : %s , port : %d \n" , new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
-       
+
             //send new connection greeting message
             if( send(new_socket, message, strlen(message), 0) != strlen(message) ) 
             {
-                perror("send");
+                errors_log("SEND FAILED!");
             }
              
-            puts("Welcome message sent successfully");
+            actions_log("Welcome message sent!");
              
             //add new socket to array of sockets
             for (i = 0; i < max_clients; i++) 
@@ -63,39 +66,43 @@ int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client
 				if( client_socket[i] == 0 )
                 {
                     client_socket[i] = new_socket;
-                    printf("Adding to list of sockets as %d\n" , i);
-					
+					connections_log(new_socket, address, i);
+                    StRs[i].sock = new_socket;
+                    StRs[i].reqStruct = i;     //pozhe razobratbsya s etoi heresy
+                    count_of_connections++;
+
 					break;
                 }
             }
         }
          
         //its some IO operation 
-        for (i = 0; i < max_clients; i++) 
+        for (int j = 0; j < max_clients; j++) 
         {
-            sd = client_socket[i];
+            sd = client_socket[j];
              
             if (FD_ISSET( sd , &readfds)) 
             {
                 //Check if it was for closing , and read the incoming message
-                if ((valread = read( sd , buffer, 1024)) == 0)
+                if ((valread = read( sd , buffer_, 1024)) == 0)
                 {
                     //Somebody disconnected , print
                     getpeername(sd , (struct sockaddr*)&address , (socklen_t*)&addrlen);
-                    printf("Host disconnected , ip %s , port %d \n" , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
-                     
+                    disconnections_log(address);
+
                     //Close the socket and mark as 0 in list for reuse
                     close( sd );
-                    client_socket[i] = 0;
+                    client_socket[j] = 0;
                 }
-                 /*
+                 
                 //Echo back the message that came in
                 else
-                {
+                {   
+                    parse_startline();
                     //set the string terminating NULL byte on the end of the data read
-                    buffer[valread] = '\0';
-                    send(sd , buffer , strlen(buffer) , 0 );
-                }*/
+                    //buffer_[valread] = '\0';
+                    //send(sd , buffer_ , strlen(buffer_) , 0 );
+                }
             }
         }
     }

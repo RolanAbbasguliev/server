@@ -7,8 +7,6 @@ int main(int argc , char *argv[])
 	int max_sd;
     struct sockaddr_in address;
      
-    char buffer[2049];  //data buffer of 2K
-     
     //set of socket descriptors
     fd_set readfds;
      
@@ -24,14 +22,14 @@ int main(int argc , char *argv[])
     //create a master_socket
     if( (master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0) 
     {
-        perror("socket failed");
+        errors_log("SOCKET FAILED!");
         exit(EXIT_FAILURE);
     }
  
     //set master_socket to allow multiple connections
     if( setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0 )
     {
-        perror("setsockopt");
+        errors_log("SETSOCKOPT FAILED!");
         exit(EXIT_FAILURE);
     }
  
@@ -43,24 +41,24 @@ int main(int argc , char *argv[])
     //bind the socket to localhost port
     if (bind(master_socket, (struct sockaddr *)&address, sizeof(address)) < 0) 
     {
-        perror("bind failed");
+        errors_log("BIND FAILED!");
         exit(EXIT_FAILURE);
     }
-	printf("Listener on port %d \n", PORT);
+
 	
     //try to specify maximum of 3 pending connections for the master socket
     if (listen(master_socket, 3) < 0)
     {
-        perror("listen");
+        errors_log("LISTEN FAILED!");
         exit(EXIT_FAILURE);
     }
      
     //accept the incoming connection
     addrlen = sizeof(address);
-    puts("Waiting for connections ...");
 
     //start waiting for an activity
-    multiplexing(master_socket, max_clients, readfds, client_socket, address, addrlen, message, buffer);
+    main_log();
+    multiplexing(master_socket, max_clients, readfds, client_socket, address, addrlen, message);
 
     return 0;
 }
