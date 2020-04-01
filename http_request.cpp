@@ -3,6 +3,7 @@
 #include "HTTP.h"
 
 LastRequest Req[MAXIMUM_CONNECTIONS];
+char response[2048];
 
 std::string convert(std::vector<char> v)
 {
@@ -10,7 +11,7 @@ std::string convert(std::vector<char> v)
     return str;
 }
 
-void parse_startline()
+void parse_startline(int new_socket)
 {   
     std::vector<char> Meth, HTTP_v, adr;
 
@@ -81,10 +82,10 @@ void parse_startline()
     //std::cout << std::endl;
     //std::cout << count_of_connections << std::endl;
     //std::cout << Req[count_of_connections].Method << "    " << Req[count_of_connections].HTTP_version << std::endl;
-    parse_headers();
+    parse_headers(new_socket);
 }
 
-void parse_headers()
+void parse_headers(int new_socket)
 {
     std::vector<char> last_h, last_h_body, buf_local;
     int flag = 0;
@@ -133,7 +134,7 @@ void parse_headers()
         //std::cout << x.first << ": " << x.second << "\n";
     //}
 
-    pick_method();
+    pick_method(new_socket);
 }
 
 
@@ -156,25 +157,28 @@ void parse_headers()
 
 
 
-void pick_method()
+void pick_method(int new_socket)
 {
-    GET_method();
+    GET_method(new_socket);
 }
 
-void GET_method()
+void GET_method(int new_socket)
 {
-    start_python();
+    start_python(new_socket);
 }
 
-void start_python()
+void start_python(int new_socket)
 {   
-    pid_t pid;
+    pid_t pid, cp;
+    int fds[2];  
+                    
+    pipe(fds);
 
-    setenv("HEADERS_LIST", map_to_str().c_str(), 1);
+    //setenv("HEADERS_LIST", map_to_str().c_str(), 1);
 
     extern char** environ;
 
-    char* argv[] = {"ph.php", "lul", NULL};
+    char* argv[] = {"p.py", "lul", NULL};
 
     if((pid = fork()) < 0)
     {
@@ -182,22 +186,55 @@ void start_python()
     }
     else if(pid == 0)
     {
-        //child
+        close(fds[0]);
+        dup2(fds[1], STDOUT_FILENO);
+        
+        setenv("HEADERS_LIST", map_to_str().c_str(), 1);
 
-        //actions_log("FORK ok");
-        int cp = execve(argv[0], argv, environ);
+        cp = execve(argv[0], argv, environ);
         if(cp == -1)
-        {
-            //std::cout << strerror(errno);
             actions_log(strerror(errno));
-        }
         else 
             actions_log("hm, vrode okey");
+
+        
     }
     else
     {
         //parent
-        ;
+
+        //std::cout << "here is parent's output: \n\n" << std::endl; 
+
+        close(fds[1]);
+
+        char buf_fds[1024];
+
+        //dup2(fds[0], STDIN_FILENO);
+
+        int cord = read(fds[0], buf_fds, 1000);
+
+        //std::cout << "paaaaarent\n---------------------\n"<< "SIZE: " << cord << std::endl;
+        /*
+        int i = 0;
+        while(1)
+        {
+            char ch = buf_fds[i];
+            if(ch == 0)
+                break;
+            else
+            {
+                std::cout << ch;
+                ++i;
+            }
+        }*/
+        close(fds[0]);
+
+        int status;
+	    waitpid(cp, &status, 0);
+        
+        //actions_log("hello from parent");
+        send_to_main_buff(buf_fds);
+        send_response(new_socket);
     }
 }
 
@@ -212,6 +249,22 @@ std::string map_to_str()
     }
     //std::cout << std::string(all_headers_s) << std::endl;
     return all_headers_s;
+}
+
+void send_to_main_buff(char* buf_fds)
+{
+    memset(&response, 0, sizeof(response));
+    
+    for(int i = 0; buf_fds[i] != 0; ++i)
+        response[i] = buf_fds[i];
+}
+
+void send_response(int new_socket)
+{
+    if(send(new_socket, response, strlen(response), 0) != strlen(response))
+    {    
+        errors_log("SEND error"); actions_log("Welcome message send sent!");
+    }
 }
 
 

@@ -3,7 +3,7 @@
 char buffer_[2049];
 int count_of_connections = -1;
 
-int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client_socket, struct sockaddr_in address, int addrlen, /*const*/ char* message)
+int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client_socket, struct sockaddr_in address, int addrlen)
 {
     int activity, valread, sd, max_sd, i, new_socket;
     sock_to_reqStruct StRs[MAXIMUM_CONNECTIONS];
@@ -52,12 +52,12 @@ int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client
             }
 
             //send new connection greeting message
-            if( send(new_socket, message, strlen(message), 0) != strlen(message) ) 
-            {
-                errors_log("SEND FAILED!");
-            }
+            //if( send(new_socket, message, strlen(message), 0) != strlen(message) ) 
+            //{
+                //errors_log("SEND FAILED!");                                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //}
              
-            actions_log("Welcome message sent!");
+            //actions_log("Welcome message sent!");
              
             //add new socket to array of sockets
             for (i = 0; i < max_clients; i++) 
@@ -98,7 +98,7 @@ int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client
                 //Echo back the message that came in
                 else
                 {   
-                    parse_startline();
+                    parse_startline(new_socket);
                     //set the string terminating NULL byte on the end of the data read
                     //buffer_[valread] = '\0';
                     //send(sd , buffer_ , strlen(buffer_) , 0 );
