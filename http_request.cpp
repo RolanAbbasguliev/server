@@ -11,12 +11,13 @@ std::string convert(std::vector<char> v)
     return str;
 }
 
-void parse_startline(int new_socket)
+void parse_startline(int i)
 {   
-    std::vector<char> Meth, HTTP_v, adr;
+    int id = conn_info[i].connection_id_of_req_struct;
 
-    //memset(&Method, 0, sizeof(Method));
-    //memset(&HTTP_version, 0, sizeof(HTTP_version));
+    //std::cout << "\n\n" << id << std::endl;   //    <---- tut chto-to ne tak -_-
+
+    std::vector<char> Meth, HTTP_v, adr;
 
     for(int i = 0; i != -1; ++i)
     {
@@ -70,22 +71,16 @@ void parse_startline(int new_socket)
             }
         }
     }
-
-    Req[count_of_connections].Method = convert(Meth);
-    Req[count_of_connections].File_Adr = convert(adr);
-    Req[count_of_connections].HTTP_version = convert(HTTP_v);
-
-    //for(int i = 0; i < 20; ++i)
-    //{
-        //std::cout << HTTP_version[i];
-    //}
-    //std::cout << std::endl;
-    //std::cout << count_of_connections << std::endl;
-    //std::cout << Req[count_of_connections].Method << "    " << Req[count_of_connections].HTTP_version << std::endl;
-    parse_headers(new_socket);
+    //actions_log("parseeeeeeeeeer badumtsss");
+    //std::cout << "\n\n" << id << std::endl;
+    Req[id].Method = convert(Meth);
+    Req[id].File_Adr = convert(adr);                    
+    Req[id].HTTP_version = convert(HTTP_v);
+    //actions_log("SUPERPARSER");
+    parse_headers(id);
 }
 
-void parse_headers(int new_socket)
+void parse_headers(int id)
 {
     std::vector<char> last_h, last_h_body, buf_local;
     int flag = 0;
@@ -118,7 +113,7 @@ void parse_headers(int new_socket)
                     last_h_body = buf_local;
                     buf_local.clear();
 
-                    Req[count_of_connections].Headers.insert(std::pair<std::string, std::string>(convert(last_h) ,convert(last_h_body)));
+                    Req[id].Headers.insert(std::pair<std::string, std::string>(convert(last_h) ,convert(last_h_body)));
                 }
                 else
                 {
@@ -127,14 +122,8 @@ void parse_headers(int new_socket)
             } 
         }
     }
-
-    //std::cout << "3" << std::endl;
-
-    //for (const auto& x : Req[count_of_connections].Headers) {
-        //std::cout << x.first << ": " << x.second << "\n";
-    //}
-
-    pick_method(new_socket);
+    //actions_log("ok - parsed");
+    pick_method(id);    
 }
 
 
@@ -157,26 +146,22 @@ void parse_headers(int new_socket)
 
 
 
-void pick_method(int new_socket)
+void pick_method(int id)
 {
-    GET_method(new_socket);
+    GET_method(id);
 }
 
-void GET_method(int new_socket)
+void GET_method(int id)
 {
-    start_python(new_socket);
+    start_python(id);
 }
 
-void start_python(int new_socket)
+void start_python(int id)
 {   
     pid_t pid, cp;
-    int fds[2];  
-                    
-    pipe(fds);
-
-    //setenv("HEADERS_LIST", map_to_str().c_str(), 1);
-
-    extern char** environ;
+    extern char** environ;                
+    
+    pipe(pipe_[id].fds);
 
     char* argv[] = {"p.py", "lul", NULL};
 
@@ -186,10 +171,17 @@ void start_python(int new_socket)
     }
     else if(pid == 0)
     {
-        close(fds[0]);
-        dup2(fds[1], STDOUT_FILENO);
+        //child
         
-        setenv("HEADERS_LIST", map_to_str().c_str(), 1);
+        close(pipe_[id].fds[0]);
+        dup2(pipe_[id].fds[1], STDOUT_FILENO);
+        
+        setenv("HEADERS_LIST", map_to_str(id).c_str(), 1);
+        if(conn_info[id].connection_id == 0 || conn_info[id].connection_id == 2)
+            setenv("TEST_M_CON", "0", 1);
+        else
+            setenv("TEST_M_CON", "1", 1);
+        
 
         cp = execve(argv[0], argv, environ);
         if(cp == -1)
@@ -203,68 +195,43 @@ void start_python(int new_socket)
     {
         //parent
 
-        //std::cout << "here is parent's output: \n\n" << std::endl; 
+        close(pipe_[id].fds[1]);
 
-        close(fds[1]);
-
-        char buf_fds[1024];
-
-        //dup2(fds[0], STDIN_FILENO);
-
-        int cord = read(fds[0], buf_fds, 1000);
-
-        //std::cout << "paaaaarent\n---------------------\n"<< "SIZE: " << cord << std::endl;
-        /*
-        int i = 0;
-        while(1)
-        {
-            char ch = buf_fds[i];
-            if(ch == 0)
-                break;
-            else
-            {
-                std::cout << ch;
-                ++i;
-            }
-        }*/
-        close(fds[0]);
-
-        int status;
-	    waitpid(cp, &status, 0);
+        //actions_log("ku ka re ku");
         
-        //actions_log("hello from parent");
-        send_to_main_buff(buf_fds);
-        send_response(new_socket);
+        
+        //int cofb = send_to_main_buff(buf_fds);
+        //send_response(id, cofb);
     }
 }
 
-std::string map_to_str()
+std::string map_to_str(int id)
 {
     std::string all_headers_s = "";
 
-    for (const auto& x : Req[count_of_connections].Headers) 
-    {
+    for (const auto& x : Req[id].Headers) 
         all_headers_s += x.first + ": " + x.second + "\n\r";
-        //std::cout << x.first << ": " << x.second << "\n";
-    }
-    //std::cout << std::string(all_headers_s) << std::endl;
+    
     return all_headers_s;
 }
 
-void send_to_main_buff(char* buf_fds)
+int send_to_main_buff(char* buf_fds)
 {
+    int cofb = 0;
     memset(&response, 0, sizeof(response));
     
     for(int i = 0; buf_fds[i] != 0; ++i)
-        response[i] = buf_fds[i];
+        response[i] = buf_fds[i], ++cofb;
+    
+    return cofb;
 }
 
-void send_response(int new_socket)
+void send_response(int new_socket, int responce_lenth)
 {
-    if(send(new_socket, response, strlen(response), 0) != strlen(response))
-    {    
+    if(send(new_socket, response, responce_lenth, 0) != responce_lenth)    
         errors_log("SEND error"); actions_log("Welcome message send sent!");
-    }
+
+    memset(&buffer_, 0, sizeof(buffer_));
 }
 
 

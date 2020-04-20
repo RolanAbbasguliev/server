@@ -1,4 +1,6 @@
 run: build
+	@echo BUILD: ok
+	@echo Starting......
 	@./a.out
 build:
 	@g++ main.cpp multiplexing.cpp main.h logs.cpp http_request.cpp HTTP.h  HTTP_req.h

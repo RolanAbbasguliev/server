@@ -8,7 +8,6 @@ int main(int argc , char *argv[])
     struct sockaddr_in address;
      
     //set of socket descriptors
-    fd_set readfds;
      
     //a test message
     //    /*const*/ char *message = /*std::string(*/ "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nConnection: keep-alive\r\n\n <html><head><h1>HELLO, FROM SERVER, MY FRIEND!</h1></head><body><h2>Made by:</h2><p>Naydenovich, Kolesnokov, Zaika</p></body></html>"/*).c_str()*/;
@@ -58,7 +57,7 @@ int main(int argc , char *argv[])
 
     //start waiting for an activity
     main_log();
-    multiplexing(master_socket, max_clients, readfds, client_socket, address, addrlen);
+    multiplexing(master_socket, max_clients, client_socket, address, addrlen);
 
     return 0;
 }

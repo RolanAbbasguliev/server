@@ -1,13 +1,24 @@
 #include "main.h"
 
+fd_set readfds;
+
+//int pipe_fds[MAXIMUM_CONNECTIONS * 2];
+
+//std::map<int, int*> pipe_fds_list;
+
+pipes pipe_[MAXIMUM_CONNECTIONS];
+
+connection_info conn_info[MAXIMUM_CONNECTIONS];
+
 char buffer_[2049];
 int count_of_connections = -1;
+int count_of_child_proc = 0;  // ++ when we doing fork()
 
-int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client_socket, struct sockaddr_in address, int addrlen)
+int multiplexing(int master_socket, int max_clients, int *client_socket, struct sockaddr_in address, int addrlen)
 {
-    int activity, valread, sd, max_sd, i, new_socket;
-    sock_to_reqStruct StRs[MAXIMUM_CONNECTIONS];
-
+    int activity, valread, sd, max_sd, i, j, new_socket, pipe_fd, max_pipe_fd = MAXIMUM_CONNECTIONS * 2, new_i;
+    //sock_to_reqStruct StRs[MAXIMUM_CONNECTIONS];
+    
     memset(&buffer_, 0, sizeof(buffer_));
 
 	while(TRUE) 
@@ -33,8 +44,20 @@ int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client
             if(sd > max_sd)
 				max_sd = sd;
         }
- 
+        //actions_log("1");
+        
+        for(int h = 0; h < MAXIMUM_CONNECTIONS; ++h)
+        {
+            FD_SET(pipe_[h].fds[0], &readfds);
+        }
+
+        //actions_log("2");
+        max_sd += max_pipe_fd;
+
+        //child_fds = count_of_child_proc * 2 + 1;
+
         //wait for an activity on one of the sockets , timeout is NULL , so wait...
+
         activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);
    
         if ((activity < 0) && (errno!=EINTR)) 
@@ -45,21 +68,15 @@ int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client
         //If something happened on the master socket , then its an incoming connection
         if (FD_ISSET(master_socket, &readfds)) 
         {
+            actions_log("FD_ISSET(master_socket.....) ---- OK");
+            //std::cout << "blahblahblah";
+            
             if ((new_socket = accept(master_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
             {
                 errors_log("ACCEPT FAILED!");
                 exit(EXIT_FAILURE);
             }
 
-            //send new connection greeting message
-            //if( send(new_socket, message, strlen(message), 0) != strlen(message) ) 
-            //{
-                //errors_log("SEND FAILED!");                                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //}
-             
-            //actions_log("Welcome message sent!");
-             
-            //add new socket to array of sockets
             for (i = 0; i < max_clients; i++) 
             {
                 //if position is empty
@@ -67,14 +84,42 @@ int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client
                 {
                     client_socket[i] = new_socket;
 					connections_log(new_socket, address, i);
-                    StRs[i].sock = new_socket;
-                    StRs[i].reqStruct = i;     //pozhe razobratbsya s etoi heresy
-                    count_of_connections++;
+
+                    //std::cout << "\n\n" << i << std::endl;
+
+                    conn_info[i].connection_id = i;
+
+                    //std::cout << "\n\n" << conn_info[i].connection_id << std::endl;
+
+                    new_i = i;
+
+                    conn_info[i].connection_socket = new_socket;
+                    conn_info[i].connection_id_of_req_struct = i;
+                    //conn_info[i].first_pipe_fd_id = i + 2; 
 
 					break;
                 }
             }
         }
+        
+        else
+        {
+            //std::cout << "WTFFFFFFFF" << std::endl;
+            for(int k = 0; k < MAXIMUM_CONNECTIONS; ++k)
+            {
+                if(FD_ISSET(pipe_[k].fds[0], &readfds))
+                {
+                    char buf_fds[2048];
+
+                    memset(&buf_fds, 0, sizeof(buf_fds));
+
+                    int cord = read(pipe_[k].fds[0], buf_fds, 1000);
+                    send(conn_info[k].connection_socket, buf_fds, cord, 0);
+
+                }
+            }
+        }
+        //actions_log("ASS");
          
         //its some IO operation 
         for (int j = 0; j < max_clients; j++) 
@@ -95,13 +140,11 @@ int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client
                     client_socket[j] = 0;
                 }
                  
-                //Echo back the message that came in
                 else
                 {   
-                    parse_startline(new_socket);
-                    //set the string terminating NULL byte on the end of the data read
-                    //buffer_[valread] = '\0';
-                    //send(sd , buffer_ , strlen(buffer_) , 0 );
+                    //std::cout << "\n\n i: " << i << std::endl;
+
+                    parse_startline(new_i);
                 }
             }
         }
@@ -109,3 +152,44 @@ int multiplexing(int master_socket, int max_clients, fd_set readfds, int *client
      
     return 0;
 }
+
+
+
+
+
+/*actions_log("blblblblblblbl");
+            for( j = 0; j < max_pipe_fd; ++j)
+            {
+                actions_log("BIG JOPA");
+
+                //for (const auto& x : pipe_fds_list) {
+                    //std::cout << x.first << ": " << x.second << "\n";
+
+                if(FD_ISSET(, &readfds))
+                {
+                    //take id of ready process and start catch his output
+                    actions_log("JOPA JOPA JOPA");
+                    for(int k = 0; k < MAXIMUM_CONNECTIONS; ++k)
+                    {
+                        if(conn_info[k].first_pipe_fd_id == j)
+                        {
+                            char buf_fds[1024];
+
+                            //std::cout << "la-la-la-la" << std::endl;
+                            actions_log("la-la-la-la");
+
+                            memset(&buf_fds, 0, sizeof(buf_fds));
+
+                            //dup2(STDOUT_FILENO, pipe_fds[conn_info[k].first_pipe_fd_id]);
+
+                            int cord = read(conn_info[k].first_pipe_fd_id, buf_fds, 1000);
+
+                            //std::cout << "WTF???" << std::endl;
+                            actions_log("WTF???");
+
+                            //send(conn_info[k].connection_socket, buf_fds, cord, 0);
+                            send(conn_info[k].connection_socket, "zzzzzzzzzzz", cord, 0);
+                        }
+                    }
+                }
+            }*/
