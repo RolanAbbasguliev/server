@@ -68,9 +68,6 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
         //If something happened on the master socket , then its an incoming connection
         if (FD_ISSET(master_socket, &readfds)) 
         {
-            actions_log("FD_ISSET(master_socket.....) ---- OK");
-            //std::cout << "blahblahblah";
-            
             if ((new_socket = accept(master_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
             {
                 errors_log("ACCEPT FAILED!");
@@ -153,6 +150,7 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
     return 0;
 }
 
+//убрать сенд из мультипл в отдельное место + сделать селект дескрипторов сокета на рид 
 
 
 

@@ -4,6 +4,9 @@
 
 LastRequest Req[MAXIMUM_CONNECTIONS];
 char response[2048];
+char content_response[260000];
+
+char buffimg[250000];
 
 std::string convert(std::vector<char> v)
 {
@@ -18,6 +21,9 @@ void parse_startline(int i)
     //std::cout << "\n\n" << id << std::endl;   //    <---- tut chto-to ne tak -_-
 
     std::vector<char> Meth, HTTP_v, adr;
+
+    for(int u = 0; u < sizeof(buffer_); ++u)
+        std::cout << buffer_[u];
 
     for(int i = 0; i != -1; ++i)
     {
@@ -35,7 +41,7 @@ void parse_startline(int i)
 
     for(int i = 0; i != -1; ++i)
     {
-        if(buffer_[i] == 0)
+        if(buffer_[i] == 0 || buffer_[i] == '/')
         {
             ;
         }
@@ -74,7 +80,10 @@ void parse_startline(int i)
     //actions_log("parseeeeeeeeeer badumtsss");
     //std::cout << "\n\n" << id << std::endl;
     Req[id].Method = convert(Meth);
-    Req[id].File_Adr = convert(adr);                    
+    Req[id].File_Adr = convert(adr);
+
+    std::cout << "\n\n----------------------\n" << Req[id].File_Adr << "\n---------------------\n" << std::endl;
+
     Req[id].HTTP_version = convert(HTTP_v);
     //actions_log("SUPERPARSER");
     parse_headers(id);
@@ -148,11 +157,23 @@ void parse_headers(int id)
 
 void pick_method(int id)
 {
-    GET_method(id);
+    if(Req[id].Method == "GET")
+    {
+        GET_method(id);
+    }
+    else
+    {
+        send_error(id, "Method");
+    }
 }
 
 void GET_method(int id)
 {
+    if(Req[id].File_Adr != "")
+    {
+        img_to_buf(Req[id].File_Adr, id);
+    }
+    
     start_python(id);
 }
 
@@ -203,6 +224,77 @@ void start_python(int id)
         //int cofb = send_to_main_buff(buf_fds);
         //send_response(id, cofb);
     }
+}
+
+void img_to_buf(std::string filename, int id)
+{
+    //std::ifstream ifstr;
+    FILE *F;
+    //char buffimg[4096];
+    int i = 0, cont_lenth = 0;
+
+    memset(&buffimg, sizeof(buffimg), 0);
+
+    if ((F = fopen(filename.c_str(), "rb")) == NULL)
+        actions_log("IMG ERROR");
+    else 
+        while(1)
+        {
+            int ch = fgetc(F);
+            if(ch == EOF){ cont_lenth = i; break;}
+            else{
+                buffimg[i] = ch;
+            ++i;
+            }
+        }
+
+    fclose(F);
+    send_img(id, cont_lenth);
+}
+
+void send_img(int id, int cont_lenth)
+{
+    std::string start = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: image/jpeg\r\nContent-Transfer-Encoding: binary\r\nContent-Length:";
+    int i = 0, j = 0, k = 0;
+
+    start += " ";
+    start += std::to_string(cont_lenth);
+    start += "\r\n\r\n";
+
+    //std::cout << "Cont_lenth: " << cont_lenth << "\n" << start << std::endl;
+
+    send(conn_info[id].connection_socket, start.c_str(), strlen(start.c_str()), 0);
+
+    //std::cout << "send headers ok" << std::endl;
+
+    send(conn_info[id].connection_socket, buffimg, cont_lenth, 0);
+
+    //std::cout << "\nsend buffer ok" << std::endl;
+
+    /*memset(&content_response, sizeof(content_response), 0);
+
+    start += " ";
+    start += strlen(buffimg);
+    start += "\r\n\r\n";
+
+    int n = start.length();
+    char resp_ok[n + 1];
+
+    strcpy(resp_ok, start.c_str());
+
+    while(resp_ok[i])    
+    {
+        content_response[i] = resp_ok[i];
+        i++;
+    }
+
+    while(buffimg[j] != EOF)
+    {
+        content_response[j] = buffimg[j];
+        j++; 
+    }*/
+
+    //send(conn_info[id].connection_socket, content_response, strlen(content_response), 0);
 }
 
 std::string map_to_str(int id)

@@ -1,56 +1,16 @@
-Mon Apr 20 19:03:41 2020 MSK: Server started!
+Mon Apr 27 19:46:21 2020 MSK: Server started!
 			Listener on port: 1234
 			Waiting for connections...
 
 
 
-
-
-Mon Apr 20 19:03:44 2020 MSK: FD_ISSET(master_socket.....) ---- OK
-
-
-Mon Apr 20 19:03:44 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 39694
+Mon Apr 27 19:46:55 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 53910
 			Added to the list of sockets as: 0
 
  
-
-
-Mon Apr 20 19:03:46 2020 MSK: FD_ISSET(master_socket.....) ---- OK
-
-
-Mon Apr 20 19:03:46 2020 MSK: New connection: socket fd is 9, ip is: 127.0.0.1, port: 39698
+Mon Apr 27 19:46:59 2020 MSK: New connection: socket fd is 9, ip is: 127.0.0.1, port: 53916
 			Added to the list of sockets as: 1
 
  
-
-
-Mon Apr 20 19:03:49 2020 MSK: FD_ISSET(master_socket.....) ---- OK
-
-
-Mon Apr 20 19:03:49 2020 MSK: New connection: socket fd is 11, ip is: 127.0.0.1, port: 39702
-			Added to the list of sockets as: 2
-
- 
-Mon Apr 20 19:04:00 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 39698
-
-
-Mon Apr 20 19:04:04 2020 MSK: FD_ISSET(master_socket.....) ---- OK
-
-
-Mon Apr 20 19:04:04 2020 MSK: New connection: socket fd is 9, ip is: 127.0.0.1, port: 39708
-			Added to the list of sockets as: 1
-
- 
-Mon Apr 20 19:04:11 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 39694
-
-
-Mon Apr 20 19:04:14 2020 MSK: FD_ISSET(master_socket.....) ---- OK
-
-
-Mon Apr 20 19:04:14 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 39714
-			Added to the list of sockets as: 0
-
- 
-Mon Apr 20 19:04:20 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 39702
-Mon Apr 20 19:04:20 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 39708
-Mon Apr 20 19:04:21 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 39714
+Mon Apr 27 19:47:00 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 53910
+Mon Apr 27 19:47:00 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 53916

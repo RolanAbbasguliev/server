@@ -58,4 +58,7 @@ void start_python(int id);
 std::string map_to_str(int id);
 int send_to_main_buff(char* buf_fds);
 void send_response(int new_socket, int responce_lenth);
+void send_error(int id, std::string error);
+void img_to_buf(std::string filename, int id);
+void send_img(int id, int cont_lenth);
 
