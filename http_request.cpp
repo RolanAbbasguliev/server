@@ -235,8 +235,10 @@ void img_to_buf(std::string filename, int id)
 
     memset(&buffimg, sizeof(buffimg), 0);
 
-    if ((F = fopen(filename.c_str(), "rb")) == NULL)
+    if ((F = fopen(filename.c_str(), "rb")) == NULL){
         actions_log("IMG ERROR");
+        send_error(id, "fnf");
+    }
     else 
         while(1)
         {
