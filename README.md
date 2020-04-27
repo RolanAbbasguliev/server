@@ -3,14 +3,12 @@
 <p>launch it and check it out :)</p>
 
 <h2>Coming soon:</h2>
-<ul><li>Full-working GET method</li>
-<li>Support for "anysize" files (right now we have 250kB limit)</li></ul>
+<ul><li>Full-working GET method</li></ul>
     
 <h2>Build & run:</h2>
 <ul><li>Build: <code>make build</code>(makefile included), and don't worry about some "warnings" :)</li>
 <li>Run: <code>make run</code>(src will be rebuilded). To test server use <code>localhost:1234</code></li>
-<li>Clear: to rm all .out files and etc. use <code>make clean</code></li>
-<li>Other: you need to do <code>chmod +x p.py</code> or you will get error</li></ul>
+<li>Clear: to rm all .out files and etc. use <code>make clean</code></li></ul>
 
 <h3>Comments:</h3>
 <p>Cmake will be added on later stage, as doxygen docs. We support any page-generating langs couse we use env vars and fetching output via pipe to work with them. </p>

@@ -2,6 +2,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,7 +26,7 @@
 struct connection_info
 {
     int connection_id;
-    int connection_socket;
+    int connection_socket = -1;
     int connection_id_of_req_struct;
 };
 

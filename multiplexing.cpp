@@ -1,6 +1,7 @@
 #include "main.h"
 
 fd_set readfds;
+//fd_set writefds;
 
 //int pipe_fds[MAXIMUM_CONNECTIONS * 2];
 
@@ -12,7 +13,7 @@ connection_info conn_info[MAXIMUM_CONNECTIONS];
 
 char buffer_[2049];
 int count_of_connections = -1;
-int count_of_child_proc = 0;  // ++ when we doing fork()
+//int count_of_child_proc = 0;  // ++ when we doing fork()
 
 int multiplexing(int master_socket, int max_clients, int *client_socket, struct sockaddr_in address, int addrlen)
 {
@@ -51,6 +52,12 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
             FD_SET(pipe_[h].fds[0], &readfds);
         }
 
+        /*for(int h = 0; h < MAXIMUM_CONNECTIONS; ++h)
+        {
+            if(conn_info[h].connection_socket != -1)
+                FD_SET(conn_info[h].connection_socket, &writefds);
+        }*/
+
         //actions_log("2");
         max_sd += max_pipe_fd;
 
@@ -58,7 +65,7 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
 
         //wait for an activity on one of the sockets , timeout is NULL , so wait...
 
-        activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);
+        activity = select( max_sd + 1 , &readfds , /*&writefds*/NULL , NULL , NULL);
    
         if ((activity < 0) && (errno!=EINTR)) 
         {
@@ -115,6 +122,21 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
 
                 }
             }
+            /*
+            for(int k = 0; k < MAXIMUM_CONNECTIONS; ++k)
+            {
+                if(conn_info[k].connection_socket == -1)
+                {
+                    ;
+                }
+                else
+                {
+                    if(FD_ISSET(conn_info[k].connection_socket, &writefds))
+                    {
+                        ;
+                    }
+                }
+            }*/
         }
         //actions_log("ASS");
          

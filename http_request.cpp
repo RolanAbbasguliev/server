@@ -4,9 +4,9 @@
 
 LastRequest Req[MAXIMUM_CONNECTIONS];
 char response[2048];
-char content_response[260000];
+//char content_response[260000];
 
-char buffimg[250000];
+char buffimg[2500];
 
 std::string convert(std::vector<char> v)
 {
@@ -171,6 +171,7 @@ void GET_method(int id)
 {
     if(Req[id].File_Adr != "")
     {
+        Req[id].status = "wff";
         img_to_buf(Req[id].File_Adr, id);
     }
     
@@ -231,7 +232,12 @@ void img_to_buf(std::string filename, int id)
     //std::ifstream ifstr;
     FILE *F;
     //char buffimg[4096];
-    int i = 0, cont_lenth = 0;
+    struct stat stat_buf;
+    stat(filename.c_str(), &stat_buf);
+    
+    int i = 0, cont_lenth = stat_buf.st_size;
+
+    Req[id].bytes_for_send = cont_lenth;
 
     memset(&buffimg, sizeof(buffimg), 0);
 
@@ -243,33 +249,89 @@ void img_to_buf(std::string filename, int id)
         while(1)
         {
             int ch = fgetc(F);
-            if(ch == EOF){ cont_lenth = i; break;}
-            else{
-                buffimg[i] = ch;
-            ++i;
-            }
+            
+            if(ch == EOF) 
+                {
+                    send_img(id, cont_lenth);
+                    //std::cout << "\nEOF!!!!" << std::endl; 
+                    break;
+                }
+            else
+                if(i == (sizeof(buffimg) - 1))
+                {
+                    buffimg[i] = ch;
+                    send_img(id, cont_lenth);
+                    memset(&buffimg, sizeof(buffimg), 0);
+                    i = 0;
+                }
+                else
+                {
+                    buffimg[i] = ch;
+                    ++i;
+                }
         }
 
     fclose(F);
-    send_img(id, cont_lenth);
 }
 
 void send_img(int id, int cont_lenth)
 {
-    std::string start = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: image/jpeg\r\nContent-Transfer-Encoding: binary\r\nContent-Length:";
-    int i = 0, j = 0, k = 0;
+    if(Req[id].status == "wff")
+    {
+        std::string start = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: image/jpeg\r\nContent-Transfer-Encoding: binary\r\nContent-Length:";
+        int i = 0, j = 0, k = 0;
 
-    start += " ";
-    start += std::to_string(cont_lenth);
-    start += "\r\n\r\n";
+        start += " ";
+        start += std::to_string(cont_lenth);
+        start += "\r\n\r\n";
 
+        send(conn_info[id].connection_socket, start.c_str(), strlen(start.c_str()), 0);
+        
+        if(Req[id].bytes_for_send <= sizeof(buffimg))
+        {
+            send(conn_info[id].connection_socket, buffimg, Req[id].bytes_for_send, 0);
+        }
+        else
+        {
+            send(conn_info[id].connection_socket, buffimg, sizeof(buffimg), 0);
+            Req[id].bytes_for_send = Req[id].bytes_for_send - sizeof(buffimg);
+        }
+        
+        //std::cout << "\nSize of file:" << cont_lenth << std::endl;
+
+        //std::cout << "\nHeaders sent!" << std::endl;
+
+        Req[id].status = "wffc";
+    }
+    else
+    {
+        if(Req[id].status == "wffc")
+        {
+            if(Req[id].bytes_for_send > sizeof(buffimg))
+            {
+                int send_b = sizeof(buffimg);
+                send(conn_info[id].connection_socket, buffimg, send_b, 0);
+                Req[id].bytes_for_send = Req[id].bytes_for_send - sizeof(buffimg);
+                
+                //std::cout << "\nPart of file sent!" << " || Count of non-sent bytes: " << Req[id].bytes_for_send << std::endl;
+
+            }
+            else
+            {
+                int send_b = Req[id].bytes_for_send;
+                send(conn_info[id].connection_socket, buffimg, send_b, 0);
+                Req[id].status = "wfr";
+
+                //std::cout<< "\nLast part sent!" << std::endl;
+            }
+            
+        }
+    }
     //std::cout << "Cont_lenth: " << cont_lenth << "\n" << start << std::endl;
-
-    send(conn_info[id].connection_socket, start.c_str(), strlen(start.c_str()), 0);
 
     //std::cout << "send headers ok" << std::endl;
 
-    send(conn_info[id].connection_socket, buffimg, cont_lenth, 0);
+    
 
     //std::cout << "\nsend buffer ok" << std::endl;
 

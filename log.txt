@@ -1,21 +1,16 @@
-Mon Apr 27 20:40:01 2020 MSK: Server started!
+Mon Apr 27 22:49:18 2020 MSK: Server started!
 			Listener on port: 1234
 			Waiting for connections...
 
 
 
-Mon Apr 27 20:40:03 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 46488
+Mon Apr 27 22:49:22 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 56480
 			Added to the list of sockets as: 0
 
  
+Mon Apr 27 22:49:23 2020 MSK: New connection: socket fd is 9, ip is: 127.0.0.1, port: 56484
+			Added to the list of sockets as: 1
 
-
-Mon Apr 27 20:40:03 2020 MSK: No such file or directory
-
-
-
-
-
-Mon Apr 27 20:40:03 2020 MSK: SELECT FAILED!
-
-Server stopped!
+ 
+Mon Apr 27 22:49:23 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 56484
+Mon Apr 27 22:49:23 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 56480
