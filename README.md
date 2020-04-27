@@ -3,7 +3,8 @@
 <p>launch it and check it out :)</p>
 
 <h2>Coming soon:</h2>
-<ul><li>Full-working GET method</li></ul>
+<ul><li>Full-working GET method</li>
+<li>Replace fgetc with read in img_to_buf() for better experience</li></ul>
     
 <h2>Build & run:</h2>
 <ul><li>Build: <code>make build</code>(makefile included), and don't worry about some "warnings" :)</li>
