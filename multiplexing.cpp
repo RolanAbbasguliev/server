@@ -139,7 +139,7 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
             }*/
         }
         //actions_log("ASS");
-         
+        //
         //its some IO operation 
         for (int j = 0; j < max_clients; j++) 
         {

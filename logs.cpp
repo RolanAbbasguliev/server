@@ -1,5 +1,7 @@
 #include "main.h"
 
+//
+
 std::ofstream fstream;
 
 void open_file(std::ofstream& fstream)

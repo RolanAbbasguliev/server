@@ -280,7 +280,7 @@ void content_to_buf(int id)
         Req[id].fs.close();
     }
 
-    //std::cout << "Bytes for read:  " << Req[id].bytes_for_send << " || " << "Status: " << Req[id].status << std::endl;
+    ///std::cout << "Bytes for read:  " << Req[id].bytes_for_send << " || " << "Status: " << Req[id].status << std::endl;
 
     send_content(id); 
 }

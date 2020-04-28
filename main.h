@@ -60,6 +60,11 @@ std::string map_to_str(int id);
 int send_to_main_buff(char* buf_fds);
 void send_response(int new_socket, int responce_lenth);
 void send_error(int id, std::string error);
-void img_to_buf(std::string filename, int id);
-void send_img(int id, int cont_lenth);
+void static_content_to_buf(std::string filename, int id);
+void send_static_content(int id, int cont_lenth);
+std::string define_content_type (int id);
+//////////////////////////////////
+void create_fstream(std::string filename, int id);
+void content_to_buf(int id);
+void send_content(int id);
 
