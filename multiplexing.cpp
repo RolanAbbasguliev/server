@@ -1,7 +1,8 @@
 #include "main.h"
+//#include "HTTP_req.h"
 
 fd_set readfds;
-//fd_set writefds;
+fd_set writefds;
 
 //int pipe_fds[MAXIMUM_CONNECTIONS * 2];
 
@@ -51,12 +52,12 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
         {
             FD_SET(pipe_[h].fds[0], &readfds);
         }
-
-        /*for(int h = 0; h < MAXIMUM_CONNECTIONS; ++h)
+        
+        for(int h = 0; h < MAXIMUM_CONNECTIONS; ++h)
         {
-            if(conn_info[h].connection_socket != -1)
+            if(conn_info[h].connection_socket != -1 && Req[h].status == "wffc")
                 FD_SET(conn_info[h].connection_socket, &writefds);
-        }*/
+        }
 
         //actions_log("2");
         max_sd += max_pipe_fd;
@@ -113,19 +114,12 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
             {
                 if(FD_ISSET(pipe_[k].fds[0], &readfds))
                 {
-                    char buf_fds[2048];
-
-                    memset(&buf_fds, 0, sizeof(buf_fds));
-
-                    int cord = read(pipe_[k].fds[0], buf_fds, 1000);
-                    send(conn_info[k].connection_socket, buf_fds, cord, 0);
-
+                    send_from_pipe(k);
                 }
             }
-            /*
             for(int k = 0; k < MAXIMUM_CONNECTIONS; ++k)
             {
-                if(conn_info[k].connection_socket == -1)
+                if(Req[k].status != "wffc")
                 {
                     ;
                 }
@@ -133,10 +127,10 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
                 {
                     if(FD_ISSET(conn_info[k].connection_socket, &writefds))
                     {
-                        ;
+                        content_to_buf(k);
                     }
                 }
-            }*/
+            }
         }
         //actions_log("ASS");
         //
@@ -170,6 +164,16 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
     }
      
     return 0;
+}
+
+void send_from_pipe(int id)
+{
+    char buf_fds[2048];
+
+    memset(&buf_fds, 0, sizeof(buf_fds));
+
+    int cord = read(pipe_[id].fds[0], buf_fds, 1000);
+    send(conn_info[id].connection_socket, buf_fds, cord, 0);
 }
 
 //убрать сенд из мультипл в отдельное место + сделать селект дескрипторов сокета на рид 

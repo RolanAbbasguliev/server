@@ -36,6 +36,20 @@ struct pipes
     int id_of_connection_info_struct;
 };
 
+struct LastRequest
+{
+    std::string Method;
+    std::string HTTP_version;
+    std::string File_Adr;
+    std::string File_type;
+    std::map<std::string, std::string> Headers;
+    std::string status;
+    std::ifstream fs;
+    int bytes_for_send = 0;
+    //int last_read_byte = 0;
+};
+
+extern LastRequest Req[MAXIMUM_CONNECTIONS];
 extern fd_set readfds;
 extern char buffer_[2049];
 //extern int count_of_connections;
@@ -67,4 +81,5 @@ std::string define_content_type (int id);
 void create_fstream(std::string filename, int id);
 void content_to_buf(int id);
 void send_content(int id);
+void send_from_pipe(int id);
 

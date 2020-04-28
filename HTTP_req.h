@@ -16,6 +16,8 @@ struct LastRequest
     int last_read_byte = 0;
 };
 
+//extern LastRequest Req[MAXIMUM_CONNECTIONS];
+
 ///////////////////////////////////////////////////
 //
 //  status:

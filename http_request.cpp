@@ -1,5 +1,5 @@
 #include "main.h"
-#include "HTTP_req.h"
+//#include "HTTP_req.h"
 #include "HTTP.h"
 
 LastRequest Req[MAXIMUM_CONNECTIONS];
@@ -280,7 +280,7 @@ void content_to_buf(int id)
         Req[id].fs.close();
     }
 
-    ///std::cout << "Bytes for read:  " << Req[id].bytes_for_send << " || " << "Status: " << Req[id].status << std::endl;
+    std::cout << "Bytes for read:  " << Req[id].bytes_for_send << " || " << "Status: " << Req[id].status << std::endl;
 
     send_content(id); 
 }
@@ -312,14 +312,14 @@ void send_content(int id)
             send(conn_info[id].connection_socket, static_content_buf, sizeof(static_content_buf), 0);
             Req[id].bytes_for_send -= sizeof(static_content_buf);
             Req[id].status = "wffc";
-            content_to_buf(id);
+            //content_to_buf(id);
         }
     }
     else if(Req[id].status == "wffc")
     {
         send(conn_info[id].connection_socket, static_content_buf, sizeof(static_content_buf), 0);
         Req[id].bytes_for_send -= sizeof(static_content_buf);
-        content_to_buf(id);
+        //content_to_buf(id);
     }
     else if(Req[id].status == "wfr")
     {
@@ -328,115 +328,6 @@ void send_content(int id)
 
     
 }
-/*
-void static_content_to_buf(std::string filename, int id)
-{
-    //std::ifstream ifstr;
-    FILE *F;
-    //char static_content_buf[4096];
-    struct stat stat_buf;
-    stat(filename.c_str(), &stat_buf);
-    
-    int i = 0, cont_lenth = stat_buf.st_size;
-
-    Req[id].bytes_for_send = cont_lenth;
-
-    memset(&static_content_buf, sizeof(static_content_buf), 0);
-
-    if ((F = fopen(filename.c_str(), "rb")) == NULL){
-        actions_log("IMG ERROR");
-        send_error(id, "fnf");
-    }
-    else
-    { 
-        while(1)
-        {
-            int ch = fgetc(F);
-            
-            if(ch == EOF) 
-                {
-                    send_static_content(id, cont_lenth);
-                    //std::cout << "\nEOF!!!!" << std::endl; 
-                    break;
-                }
-            else
-                if(i == (sizeof(static_content_buf) - 1))
-                {
-                    static_content_buf[i] = ch;
-                    send_static_content(id, cont_lenth);
-                    memset(&static_content_buf, sizeof(static_content_buf), 0);
-                    i = 0;
-                }
-                else
-                {
-                    static_content_buf[i] = ch;
-                    ++i;
-                }
-        }
-        fclose(F);
-    }
-}
-
-void send_static_content(int id, int cont_lenth)
-{
-    if(Req[id].status == "wff")
-    {
-        std::string start = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: ";
-        std::string end = "\r\nContent-Transfer-Encoding: binary\r\nContent-Length:";
-        int i = 0, j = 0, k = 0;
-        
-        start += define_content_type(id);
-        start += "/";
-        start += Req[id].File_type;
-        start += end;
-        start += " ";
-        start += std::to_string(cont_lenth);
-        start += "\r\n\r\n";
-
-        send(conn_info[id].connection_socket, start.c_str(), strlen(start.c_str()), 0);
-        
-        if(Req[id].bytes_for_send <= sizeof(static_content_buf))
-        {
-            send(conn_info[id].connection_socket, static_content_buf, Req[id].bytes_for_send, 0);
-        }
-        else
-        {
-            send(conn_info[id].connection_socket, static_content_buf, sizeof(static_content_buf), 0);
-            Req[id].bytes_for_send = Req[id].bytes_for_send - sizeof(static_content_buf);
-        }
-        
-        //std::cout << "\nSize of file:" << cont_lenth << std::endl;
-
-        //std::cout << "\nHeaders sent!" << std::endl;
-
-        Req[id].status = "wffc";
-    }
-    else
-    {
-        if(Req[id].status == "wffc")
-        {
-            if(Req[id].bytes_for_send > sizeof(static_content_buf))
-            {
-                int send_b = sizeof(static_content_buf);
-                send(conn_info[id].connection_socket, static_content_buf, send_b, 0);
-                Req[id].bytes_for_send = Req[id].bytes_for_send - sizeof(static_content_buf);
-                
-                //std::cout << "\nPart of file sent!" << " || Count of non-sent bytes: " << Req[id].bytes_for_send << std::endl;
-
-            }
-            else
-            {
-                int send_b = Req[id].bytes_for_send;
-                send(conn_info[id].connection_socket, static_content_buf, send_b, 0);
-                Req[id].status = "wfr";
-
-                //std::cout<< "\nLast part sent!" << std::endl;
-            }
-            
-        }
-    }
-}
-*/
 
 std::string map_to_str(int id)
 {
