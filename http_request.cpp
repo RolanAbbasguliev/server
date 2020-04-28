@@ -6,7 +6,7 @@ LastRequest Req[MAXIMUM_CONNECTIONS];
 char response[2048];
 //char content_response[260000];
 
-char buffimg[2500];
+char static_content_buf[2500];
 
 std::string convert(std::vector<char> v)
 {
@@ -16,11 +16,11 @@ std::string convert(std::vector<char> v)
 
 void parse_startline(int i)
 {   
-    int id = conn_info[i].connection_id_of_req_struct;
+    int id = conn_info[i].connection_id_of_req_struct, flag = 0, sl_flag = 0;
 
     //std::cout << "\n\n" << id << std::endl;   //    <---- tut chto-to ne tak -_-
 
-    std::vector<char> Meth, HTTP_v, adr;
+    std::vector<char> Meth, HTTP_v, adr, ftype;
 
     for(int u = 0; u < sizeof(buffer_); ++u)
         std::cout << buffer_[u];
@@ -41,25 +41,43 @@ void parse_startline(int i)
 
     for(int i = 0; i != -1; ++i)
     {
-        if(buffer_[i] == 0 || buffer_[i] == '/')
+        if((buffer_[i] == 0 || buffer_[i] == '/'))
         {
-            ;
+            if(sl_flag == 1)
+                adr.push_back(buffer_[i]);
+            else if(buffer_[i] == 0)
+                ;
+            else
+                sl_flag = 1;
         }
         else
         {
             if(buffer_[i] == ' ')
             {
-                buffer_[i] = 0;
+                buffer_[i] = 0, flag = 0;
                 break;
             }
             else
             {
+                if(buffer_[i] == '.')
+                {
+                    if(buffer_[i + 1] == '.' && buffer_[i + 2] == '/')
+                        adr.push_back(buffer_[i]), adr.push_back(buffer_[i]), adr.push_back(buffer_[i + 2]);
+                    else
+                        flag = 1;
+                }
+                if(flag == 1)
+                {
+                    if(buffer_[i] != '.')
+                        ftype.push_back(buffer_[i]);
+                }
+
                 adr.push_back(buffer_[i]);
                 buffer_[i] = 0;
             }
         }
     }
-        
+
     for(int i = 0; i != -1; ++i)
     {
         if(buffer_[i] == 0)
@@ -79,10 +97,13 @@ void parse_startline(int i)
     }
     //actions_log("parseeeeeeeeeer badumtsss");
     //std::cout << "\n\n" << id << std::endl;
+    sl_flag = 0;
+
     Req[id].Method = convert(Meth);
     Req[id].File_Adr = convert(adr);
+    Req[id].File_type = convert(ftype);
 
-    std::cout << "\n\n----------------------\n" << Req[id].File_Adr << "\n---------------------\n" << std::endl;
+    std::cout << "\n\n----------------------\n" << Req[id].File_Adr << " || " << Req[id].File_type << "\n---------------------\n" << std::endl;
 
     Req[id].HTTP_version = convert(HTTP_v);
     //actions_log("SUPERPARSER");
@@ -172,10 +193,19 @@ void GET_method(int id)
     if(Req[id].File_Adr != "")
     {
         Req[id].status = "wff";
-        img_to_buf(Req[id].File_Adr, id);
+        //static_content_to_buf(Req[id].File_Adr, id);
+        create_fstream(Req[id].File_Adr, id);
+    }
+    else
+    {
+        start_python(id);
     }
     
-    start_python(id);
+}
+
+void parse_filetype(int id)
+{
+    ;
 }
 
 void start_python(int id)
@@ -199,11 +229,6 @@ void start_python(int id)
         dup2(pipe_[id].fds[1], STDOUT_FILENO);
         
         setenv("HEADERS_LIST", map_to_str(id).c_str(), 1);
-        if(conn_info[id].connection_id == 0 || conn_info[id].connection_id == 2)
-            setenv("TEST_M_CON", "0", 1);
-        else
-            setenv("TEST_M_CON", "1", 1);
-        
 
         cp = execve(argv[0], argv, environ);
         if(cp == -1)
@@ -227,11 +252,88 @@ void start_python(int id)
     }
 }
 
-void img_to_buf(std::string filename, int id)
+void create_fstream(std::string filename, int id)
+{
+    Req[id].fs.open (filename, std::ifstream::binary);
+
+    struct stat stat_buf;
+    stat(filename.c_str(), &stat_buf);
+
+    Req[id].bytes_for_send = stat_buf.st_size;
+
+    Req[id].status = "wff";
+
+    content_to_buf(id);
+}
+
+void content_to_buf(int id)
+{
+    memset(&static_content_buf, sizeof(static_content_buf), 0);
+
+    if(Req[id].bytes_for_send > sizeof(static_content_buf))
+        Req[id].fs.read(static_content_buf, sizeof(static_content_buf));
+    else
+        Req[id].fs.read(static_content_buf, Req[id].bytes_for_send), Req[id].status = "wfr";
+
+    if(Req[id].status == "wfr")
+    {
+        Req[id].fs.close();
+    }
+
+    //std::cout << "Bytes for read:  " << Req[id].bytes_for_send << " || " << "Status: " << Req[id].status << std::endl;
+
+    send_content(id); 
+}
+
+void send_content(int id)
+{
+    if(Req[id].status == "wff")
+    {
+        std::string start = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: ";
+        std::string end = "\r\nContent-Transfer-Encoding: binary\r\nContent-Length:";
+        int i = 0, j = 0, k = 0;
+        
+        start += define_content_type(id);
+        start += "/";
+        start += Req[id].File_type;
+        start += end;
+        start += " ";
+        start += std::to_string(Req[id].bytes_for_send);
+        start += "\r\n\r\n";
+
+        send(conn_info[id].connection_socket, start.c_str(), strlen(start.c_str()), 0);
+        
+        if(Req[id].bytes_for_send <= sizeof(static_content_buf))
+        {
+            send(conn_info[id].connection_socket, static_content_buf, Req[id].bytes_for_send, 0);
+        }
+        else
+        {
+            send(conn_info[id].connection_socket, static_content_buf, sizeof(static_content_buf), 0);
+            Req[id].bytes_for_send -= sizeof(static_content_buf);
+            Req[id].status = "wffc";
+            content_to_buf(id);
+        }
+    }
+    else if(Req[id].status == "wffc")
+    {
+        send(conn_info[id].connection_socket, static_content_buf, sizeof(static_content_buf), 0);
+        Req[id].bytes_for_send -= sizeof(static_content_buf);
+        content_to_buf(id);
+    }
+    else if(Req[id].status == "wfr")
+    {
+        send(conn_info[id].connection_socket, static_content_buf, Req[id].bytes_for_send, 0);
+    }
+
+    
+}
+/*
+void static_content_to_buf(std::string filename, int id)
 {
     //std::ifstream ifstr;
     FILE *F;
-    //char buffimg[4096];
+    //char static_content_buf[4096];
     struct stat stat_buf;
     stat(filename.c_str(), &stat_buf);
     
@@ -239,62 +341,68 @@ void img_to_buf(std::string filename, int id)
 
     Req[id].bytes_for_send = cont_lenth;
 
-    memset(&buffimg, sizeof(buffimg), 0);
+    memset(&static_content_buf, sizeof(static_content_buf), 0);
 
     if ((F = fopen(filename.c_str(), "rb")) == NULL){
         actions_log("IMG ERROR");
         send_error(id, "fnf");
     }
-    else 
+    else
+    { 
         while(1)
         {
             int ch = fgetc(F);
             
             if(ch == EOF) 
                 {
-                    send_img(id, cont_lenth);
+                    send_static_content(id, cont_lenth);
                     //std::cout << "\nEOF!!!!" << std::endl; 
                     break;
                 }
             else
-                if(i == (sizeof(buffimg) - 1))
+                if(i == (sizeof(static_content_buf) - 1))
                 {
-                    buffimg[i] = ch;
-                    send_img(id, cont_lenth);
-                    memset(&buffimg, sizeof(buffimg), 0);
+                    static_content_buf[i] = ch;
+                    send_static_content(id, cont_lenth);
+                    memset(&static_content_buf, sizeof(static_content_buf), 0);
                     i = 0;
                 }
                 else
                 {
-                    buffimg[i] = ch;
+                    static_content_buf[i] = ch;
                     ++i;
                 }
         }
-
-    fclose(F);
+        fclose(F);
+    }
 }
 
-void send_img(int id, int cont_lenth)
+void send_static_content(int id, int cont_lenth)
 {
     if(Req[id].status == "wff")
     {
-        std::string start = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: image/jpeg\r\nContent-Transfer-Encoding: binary\r\nContent-Length:";
+        std::string start = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: ";
+        std::string end = "\r\nContent-Transfer-Encoding: binary\r\nContent-Length:";
         int i = 0, j = 0, k = 0;
-
+        
+        start += define_content_type(id);
+        start += "/";
+        start += Req[id].File_type;
+        start += end;
         start += " ";
         start += std::to_string(cont_lenth);
         start += "\r\n\r\n";
 
         send(conn_info[id].connection_socket, start.c_str(), strlen(start.c_str()), 0);
         
-        if(Req[id].bytes_for_send <= sizeof(buffimg))
+        if(Req[id].bytes_for_send <= sizeof(static_content_buf))
         {
-            send(conn_info[id].connection_socket, buffimg, Req[id].bytes_for_send, 0);
+            send(conn_info[id].connection_socket, static_content_buf, Req[id].bytes_for_send, 0);
         }
         else
         {
-            send(conn_info[id].connection_socket, buffimg, sizeof(buffimg), 0);
-            Req[id].bytes_for_send = Req[id].bytes_for_send - sizeof(buffimg);
+            send(conn_info[id].connection_socket, static_content_buf, sizeof(static_content_buf), 0);
+            Req[id].bytes_for_send = Req[id].bytes_for_send - sizeof(static_content_buf);
         }
         
         //std::cout << "\nSize of file:" << cont_lenth << std::endl;
@@ -307,11 +415,11 @@ void send_img(int id, int cont_lenth)
     {
         if(Req[id].status == "wffc")
         {
-            if(Req[id].bytes_for_send > sizeof(buffimg))
+            if(Req[id].bytes_for_send > sizeof(static_content_buf))
             {
-                int send_b = sizeof(buffimg);
-                send(conn_info[id].connection_socket, buffimg, send_b, 0);
-                Req[id].bytes_for_send = Req[id].bytes_for_send - sizeof(buffimg);
+                int send_b = sizeof(static_content_buf);
+                send(conn_info[id].connection_socket, static_content_buf, send_b, 0);
+                Req[id].bytes_for_send = Req[id].bytes_for_send - sizeof(static_content_buf);
                 
                 //std::cout << "\nPart of file sent!" << " || Count of non-sent bytes: " << Req[id].bytes_for_send << std::endl;
 
@@ -319,7 +427,7 @@ void send_img(int id, int cont_lenth)
             else
             {
                 int send_b = Req[id].bytes_for_send;
-                send(conn_info[id].connection_socket, buffimg, send_b, 0);
+                send(conn_info[id].connection_socket, static_content_buf, send_b, 0);
                 Req[id].status = "wfr";
 
                 //std::cout<< "\nLast part sent!" << std::endl;
@@ -327,39 +435,8 @@ void send_img(int id, int cont_lenth)
             
         }
     }
-    //std::cout << "Cont_lenth: " << cont_lenth << "\n" << start << std::endl;
-
-    //std::cout << "send headers ok" << std::endl;
-
-    
-
-    //std::cout << "\nsend buffer ok" << std::endl;
-
-    /*memset(&content_response, sizeof(content_response), 0);
-
-    start += " ";
-    start += strlen(buffimg);
-    start += "\r\n\r\n";
-
-    int n = start.length();
-    char resp_ok[n + 1];
-
-    strcpy(resp_ok, start.c_str());
-
-    while(resp_ok[i])    
-    {
-        content_response[i] = resp_ok[i];
-        i++;
-    }
-
-    while(buffimg[j] != EOF)
-    {
-        content_response[j] = buffimg[j];
-        j++; 
-    }*/
-
-    //send(conn_info[id].connection_socket, content_response, strlen(content_response), 0);
 }
+*/
 
 std::string map_to_str(int id)
 {
@@ -390,4 +467,14 @@ void send_response(int new_socket, int responce_lenth)
     memset(&buffer_, 0, sizeof(buffer_));
 }
 
+std::string define_content_type (int id)
+{
+    std::string file_type = Req[id].File_type;
+    std::string type;
+
+    if(file_type == "jpeg" || file_type == "jpg" || file_type == "png" || file_type == "ico")
+        type = "image";
+
+    return type;
+}
 
