@@ -366,6 +366,9 @@ std::string define_content_type (int id)
     if(file_type == "jpeg" || file_type == "jpg" || file_type == "png" || file_type == "ico")
         type = "image";
 
+    if(file_type == "mp3")
+        type = "music", Req[id].File_type = "mpeg3";
+    
     return type;
 }
 
