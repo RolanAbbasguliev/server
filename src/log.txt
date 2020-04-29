@@ -1,0 +1,209 @@
+Wed Apr 29 12:44:09 2020 MSK: Server started!
+			Listener on port: 0
+			Waiting for connections...
+
+
+
+Wed Apr 29 12:44:14 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42548
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:14 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42548
+Wed Apr 29 12:44:14 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42552
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:14 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42552
+
+
+
+Wed Apr 29 12:44:14 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:14 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42556
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:14 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42556
+
+
+
+Wed Apr 29 12:44:14 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:19 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42564
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:19 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42564
+
+
+
+Wed Apr 29 12:44:19 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:19 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42568
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:19 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42568
+
+
+
+Wed Apr 29 12:44:19 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:21 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42572
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:21 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42572
+
+
+
+Wed Apr 29 12:44:21 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:22 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42578
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:22 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42578
+
+
+
+Wed Apr 29 12:44:22 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:22 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42582
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:22 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42582
+
+
+
+Wed Apr 29 12:44:22 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:23 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42586
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:23 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42586
+
+
+
+Wed Apr 29 12:44:23 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:24 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42590
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:24 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42590
+
+
+
+Wed Apr 29 12:44:24 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:24 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42594
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:24 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42594
+
+
+
+Wed Apr 29 12:44:24 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:25 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42598
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:25 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42598
+
+
+
+Wed Apr 29 12:44:25 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:26 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42602
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:26 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42602
+
+
+
+Wed Apr 29 12:44:26 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:26 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42606
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:26 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42606
+
+
+
+Wed Apr 29 12:44:26 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:28 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42610
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:28 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42610
+
+
+
+Wed Apr 29 12:44:28 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:30 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42614
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:30 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42614
+
+
+
+Wed Apr 29 12:44:30 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:30 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42618
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:31 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42618
+
+
+
+Wed Apr 29 12:44:31 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:31 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42622
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:31 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42622
+
+
+
+Wed Apr 29 12:44:31 2020 MSK: SELECT FAILED!
+
+Server stopped!
+Wed Apr 29 12:44:32 2020 MSK: New connection: socket fd is 7, ip is: 127.0.0.1, port: 42626
+			Added to the list of sockets as: 0
+
+ 
+Wed Apr 29 12:44:32 2020 MSK: Host disconnected, ip is: 127.0.0.1, port: 42626
+
+
+
+Wed Apr 29 12:44:32 2020 MSK: SELECT FAILED!
+
+Server stopped!
