@@ -3,10 +3,10 @@
 <p>launch it and check it out :)</p>
 
 <h2>Coming soon:</h2>
-<ul><li>Full-working GET method</li><li>Send funcs in select()</li></ul>
+<ul><li>Full-working POST method</li></ul>
     
 <h2>Build & run:</h2>
-<ul><li>Build: <code>make build</code>(makefile included), and don't worry about some "warnings" :)</li>
+<ul><li>Build: place src files and "files" folder in one directory, then <code>make build</code>(makefile included), and don't worry about some "warnings" :)</li>
 <li>Run: <code>make run</code>(src will be rebuilded). To test server use <code>localhost:1234</code></li>
 <li>Clear: to rm all .out files and etc. use <code>make clean</code></li></ul>
 
