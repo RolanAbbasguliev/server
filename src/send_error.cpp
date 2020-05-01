@@ -10,5 +10,3 @@ void send_error(int id, std::string error)
     if(error == "fnf")
         send(conn_info[id].connection_socket, error_file, strlen(error_file), 0);
 }
-
-//

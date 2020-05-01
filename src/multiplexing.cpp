@@ -127,6 +127,9 @@ void send_from_pipe(int id)
 
     int cord = read(pipe_[id].fds[0], buf_fds, 1000);
     send(conn_info[id].connection_socket, buf_fds, cord, 0);
+
+    //create_fstream("favicon.ico", id);
+    //create_fstream("backgr.png", id);
 }
 
 

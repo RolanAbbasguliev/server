@@ -3,8 +3,6 @@
 char config_buff[3000];
 std::map<std::string, std::string> config;
 
-//enum param {PORT, MAXIMUM_CONNECTIONS, FILES_PATH};
-
 void load_cfg_file()
 {
     FILE *F;

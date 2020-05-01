@@ -29,9 +29,7 @@ struct connection_info
 {
     connection_info()
     {
-        //int connection_id = -1;
         int connection_socket = -1;
-        //int connection_id_of_req_struct = -1;
     }
     int connection_id;
     int connection_socket = -1;
@@ -60,22 +58,16 @@ struct LastRequest
     std::string status;
     std::ifstream fs;
     int bytes_for_send = 0;
-    //int last_read_byte = 0;
+    int count_of_r = 0;
 };
 
 extern std::map<std::string, std::string> config;
-//extern LastRequest Req[MAXIMUM_CONNECTIONS];
 extern LastRequest *Req;
 extern fd_set readfds;
 extern char buffer_[2049];
-//extern int count_of_connections;
 extern int count_of_child_proc;
-//extern connection_info conn_info[MAXIMUM_CONNECTIONS];
 extern connection_info *conn_info;
 extern pipes *pipe_;
-//extern int pipe_fds[MAXIMUM_CONNECTIONS * 2];
-//extern std::map<int, int*> pipe_fds_list;
-//extern pipes pipe_[MAXIMUM_CONNECTIONS];
 
 int multiplexing(int master_socket, int max_clients, int *client_socket, sockaddr_in address, int addrlen);
 void main_log();
