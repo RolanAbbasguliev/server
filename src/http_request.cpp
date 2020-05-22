@@ -1,11 +1,25 @@
 #include "main.h"
 
+/**
+ * @brief Converting std::vector to std::string
+ * 
+ * @param v std::vector<char> which will be converted 
+ * 
+ * @return std::string
+ */
 std::string convert(std::vector<char> v)
 {
     std::string str(v.begin(), v.end());
     return str;
 }
 
+/**
+ * @brief Parsing first line of incoming HTTP request
+ * 
+ * @param i ID of client which sent this request
+ * 
+ * @return Nothing 
+ */
 void parse_startline(int i)
 {   
 
@@ -32,7 +46,7 @@ void parse_startline(int i)
 
     for(int i = 0; i != -1; ++i)
     {
-        if((buffer_[i] == 0 || buffer_[i] == '/'))
+        if(buffer_[i] == 0 )
         {
             if(sl_flag == 1)
                 adr.push_back(buffer_[i]);
@@ -99,6 +113,13 @@ void parse_startline(int i)
     parse_headers(id);
 }
 
+/**
+ * @brief Parsing list of headers in incoming HTTP request
+ * 
+ * @param id ID of client which sent this request
+ * 
+ * @return Nothing
+ */
 void parse_headers(int id)
 {
     std::vector<char> last_h, last_h_body, buf_local;

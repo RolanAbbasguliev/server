@@ -1,15 +1,25 @@
 #include "main.h"
 
-int MAXIMUM_CONNECTIONS;
-int _PORT_;
-std::string FILES_PATH;
+int MAXIMUM_CONNECTIONS; ///< Maxumum of connections at the same time
+int _PORT_; ///< Defines port for connection
+std::string FILES_PATH; ///< Defines path for frontend files
 
+/**
+ * @brief Entry point
+ * 
+ * Execution of the program starts here
+ * 
+ * @param argc Number of arguments
+ * @param argv List of arguments
+ * 
+ * @return Nothing
+ */
 int main(int argc , char *argv[])
 {
     int opt = TRUE;
     int master_socket , addrlen , client_socket[10] , max_clients = 10, i;
 	int max_sd;
-    struct sockaddr_in address;
+    struct sockaddr_in address; ///< TCP connection struct
 
     main_log();
     load_cfg_file();

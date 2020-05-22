@@ -1,19 +1,30 @@
 #include "main.h"
 
-fd_set readfds;
-fd_set writefds;
+fd_set readfds; ///< Select() are waiting this fds for reading
+fd_set writefds; ///< Select() are waiting this fds for writing
 
 struct pipes *pipe_ = 0;
 struct connection_info *conn_info = 0;
 struct LastRequest *Req = 0;
 
-char buffer_[2049];
+char buffer_[2049]; ///< Buffer for incoming requests
 
+/**
+ * @brief Main fuction of the project
+ * 
+ *  @param master_socket Master socket
+ *  @param max_clients Deprecated
+ *  @param client_socket Pointer to array of client's sockets fds
+ *  @param adress TCP information
+ *  @param addrlen Lenth of adress
+ * 
+ *  @return While(1) function. Returning 0 if error
+ */
 int multiplexing(int master_socket, int max_clients, int *client_socket, struct sockaddr_in address, int addrlen)
 {
     int activity, valread, sd, max_sd, i, j, new_socket, pipe_fd, max_pipe_fd = MAXIMUM_CONNECTIONS * 2, new_i;
 
-    pipe_ = new struct pipes[MAXIMUM_CONNECTIONS];
+    pipe_ = new struct pipes[MAXIMUM_CONNECTIONS]; 
     conn_info = new struct connection_info[MAXIMUM_CONNECTIONS];
     Req = new struct LastRequest[MAXIMUM_CONNECTIONS];
     
@@ -89,7 +100,7 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
             {
                 if(Req[k].status == "wffc")
                     if(FD_ISSET(conn_info[k].connection_socket, &writefds))
-                        std::cout<< "call form mult: " << std::endl, content_to_buf(k);
+                        content_to_buf(k);
             }
         }
  
@@ -118,53 +129,25 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
     return 0;
 }
 
-
+/**
+ * @brief Sending to client data from pipe
+ * 
+ * @param id ID of client, which must receive this data
+ * 
+ * @return Nothing
+ */
 void send_from_pipe(int id)
 {
     char buf_fds[2048];
 
-    memset(&buf_fds, 0, sizeof(buf_fds));
+    memset(&buf_fds, sizeof(buf_fds), 0);
 
     int cord = read(pipe_[id].fds[0], buf_fds, 1000);
-    send(conn_info[id].connection_socket, buf_fds, cord, 0);
 
-    //create_fstream("favicon.ico", id);
-    //create_fstream("backgr.png", id);
+    send(conn_info[id].connection_socket, buf_fds, cord, 0);
 }
 
 
-/*
-void send_from_pipe(int id)
-{
-    char buf_fds[2048];
-    char req_body[2048];
-    int i = 0, h_size = 0;
-
-    std::cout << "hey" << std::endl;
-
-    memset(&buf_fds, sizeof(buf_fds), 0);
-    memset(&req_body, sizeof(req_body), 0);
-
-    int cord = read(pipe_[id].fds[0], buf_fds, sizeof(buf_fds));
-
-    while(1)
-    {
-        if(buf_fds[i] == '\r' && buf_fds[i + 1] == '\n' && buf_fds[i + 2] == '\n')
-            {h_size = i + 3; break;}
-        i++;
-    }
-
-    memmove(req_body + 0, buf_fds + (h_size - 1), (cord - h_size));
-
-    Req[id].File_Adr = "backgr.png";
-
-    std::cout << (cord - h_size) << std::endl;
-
-    std::cout << "hoo" << std::endl;
-
-    send(conn_info[id].connection_socket, buf_fds, h_size, 0);
-    send(conn_info[id].connection_socket, req_body, cord - h_size, 0);
-}*/
 
 
 

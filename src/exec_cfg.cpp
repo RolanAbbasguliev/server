@@ -1,8 +1,13 @@
 #include "main.h"
 
-char config_buff[3000];
-std::map<std::string, std::string> config;
+char config_buff[3000]; ///< Buffer for configuration file
+std::map<std::string, std::string> config; ///< Map for pairs param-value from configuration file
 
+/**
+ * @brief Loading cfg file config.cfg for reading
+ * 
+ * @return Nothing
+ */
 void load_cfg_file()
 {
     FILE *F;
@@ -11,7 +16,7 @@ void load_cfg_file()
     if((F = fopen("config.cfg", "rb")) == NULL)
         actions_log("CONFIG ERROR");
 
-    memset(&config_buff, sizeof(config_buff), 0);
+    memset(&config_buff, 0, sizeof(config_buff));
     
     while(1)
     {
@@ -26,6 +31,13 @@ void load_cfg_file()
     parse_cfg_file(cfg_size);
 }
 
+/**
+ * @brief Parsing config.cfg file
+ * 
+ * @param cfg_size Size of config.cfg
+ * 
+ * @return Nothing
+ */
 void parse_cfg_file(int cfg_size)
 {
     std::vector<char> param_name, param_value;
@@ -46,6 +58,11 @@ void parse_cfg_file(int cfg_size)
     exec_cfg();
 }
 
+/**
+ * @brief Applying params from cfg file
+ * 
+ * @return Nothing
+ */
 void exec_cfg()
 {
     for(auto it = config.cbegin(); it != config.cend(); ++it)
@@ -61,6 +78,14 @@ void exec_cfg()
     }
 }
 
+
+/**
+ * @brief Converting std::string value to int
+ * 
+ * @param string std::string for converting
+ * 
+ * @return int value
+ */
 int str_to_int(std::string string)
 {
     std::stringstream str(string);

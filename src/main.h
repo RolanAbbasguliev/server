@@ -17,6 +17,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
+#include <list>
 
 #define TRUE   1
 #define FALSE  0
@@ -24,6 +25,10 @@
 extern int MAXIMUM_CONNECTIONS;
 extern int _PORT_;
 extern std::string FILES_PATH;
+
+/**
+ * @brief Struct with info about connection
+ */
 
 struct connection_info
 {
@@ -36,6 +41,9 @@ struct connection_info
     int connection_id_of_req_struct;
 };
 
+/**
+ * @brief This struct containes file deckriptors for pipes
+ */
 struct pipes
 {
     pipes()
@@ -48,6 +56,9 @@ struct pipes
     int id_of_connection_info_struct;
 };
 
+/**
+ * @brief This stuct containes request info
+ */
 struct LastRequest
 {
     std::string Method;
@@ -63,9 +74,7 @@ struct LastRequest
 
 extern std::map<std::string, std::string> config;
 extern LastRequest *Req;
-extern fd_set readfds;
 extern char buffer_[2049];
-extern int count_of_child_proc;
 extern connection_info *conn_info;
 extern pipes *pipe_;
 
@@ -79,7 +88,7 @@ void parse_startline(int i);
 void parse_headers(int id);
 void pick_method(int id);
 void GET_method(int id);
-void start_python(int id);
+void start_interp(int id, std::string script_name);
 std::string map_to_str(int id);
 int send_to_main_buff(char* buf_fds);
 void send_response(int new_socket, int responce_lenth);
@@ -96,4 +105,4 @@ void load_cfg_file();
 void parse_cfg_file(int cfg_size);
 void exec_cfg();
 int str_to_int(std::string string);
-
+void POST_method(int id);
