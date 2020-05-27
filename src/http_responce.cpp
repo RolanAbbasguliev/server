@@ -58,7 +58,36 @@ void GET_method(int id)
  */
 void POST_method(int id)
 {
+    FILE *F;
+    std::string filename = Req[id].File_Adr; 
 
+    if((F = fopen(filename.c_str(), "rb")) == NULL)
+    {
+        //close(F);
+
+        std::string outfile_name = generate_filename(id);
+        std::ofstream outfile (outfile_name);
+
+        outfile << Req[id].Body;
+
+        //next step: send all this shit to .tmp file and fix parser (405 error in big POSTs)
+    }
+}
+
+/**
+ * @brief Generating filenames for .tmp files
+ * 
+ * @param id ID of the client
+ * 
+ * @return std::string Filename
+ */
+std::string generate_filename(int id)
+{
+    std::string result;
+
+    //need to add filetype in name generator
+
+    return result = "client_" +  std::to_string(id) + ".tmp";
 }
 
 /**

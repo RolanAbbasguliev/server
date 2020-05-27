@@ -109,3 +109,4 @@ void exec_cfg();
 int str_to_int(std::string string);
 void POST_method(int id);
 std::vector<char> useless_func(int i);
+std::string generate_filename(int id);

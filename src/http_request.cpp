@@ -13,6 +13,10 @@ void parse_startline(int i)
     i = 0;
     std::vector<char> Meth, HTTP_v, adr, ftype;
 
+    //printing buffer_ for debug
+    for(int u = 0; u < sizeof(buffer_); ++u)
+        std::cout << buffer_[u];
+
     while(1)
     {
         if(buffer_[i] != ' ')
@@ -46,7 +50,6 @@ void parse_startline(int i)
             {ftype = useless_func(i); break;}
         
     }
-
 
     Req[id].Method = convert(Meth);
     Req[id].File_Adr = convert(adr);
