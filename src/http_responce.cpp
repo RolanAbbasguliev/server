@@ -170,7 +170,7 @@ void content_to_buf(int id)
 /**
  * @brief Sending static_content_buf to client
  * 
- * @param ID of client which sent this request
+ * @param id of client which sent this request
  * 
  * @return Nothing
  */

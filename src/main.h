@@ -18,6 +18,7 @@
 #include <map>
 #include <sstream>
 #include <list>
+#include <boost/algorithm/string.hpp>
 
 #define TRUE   1
 #define FALSE  0
@@ -66,6 +67,7 @@ struct LastRequest
     std::string File_Adr;
     std::string File_type;
     std::map<std::string, std::string> Headers;
+    std::string Body;
     std::string status;
     std::ifstream fs;
     int bytes_for_send = 0;
@@ -106,3 +108,4 @@ void parse_cfg_file(int cfg_size);
 void exec_cfg();
 int str_to_int(std::string string);
 void POST_method(int id);
+std::vector<char> useless_func(int i);
