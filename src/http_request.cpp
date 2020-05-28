@@ -1,4 +1,9 @@
-#include "main.h"
+#ifndef _BUILD_TESTS_
+    #include "main.h"
+#endif
+#ifdef _BUILD_TESTS_
+    #include "unittests_main.h"
+#endif
 
 /**
  * @brief Parsing request startline
@@ -9,7 +14,12 @@
  */
 void parse_startline(int i)
 {
-    int id = conn_info[i].connection_id_of_req_struct;
+    #ifndef _BUILD_TESTS_
+        int id = conn_info[i].connection_id_of_req_struct;
+    #endif
+    #ifdef _BUILD_TESTS_
+        int id = 1;
+    #endif
     i = 0;
     std::vector<char> Meth, HTTP_v, adr, ftype;
 
@@ -52,10 +62,18 @@ void parse_startline(int i)
     }
 
     Req[id].Method = convert(Meth);
-    Req[id].File_Adr = convert(adr);
-    Req[id].File_type = convert(ftype);
-    Req[id].HTTP_version = convert(HTTP_v);
 
+    if(WebKitFromBoundary_check(id))
+        {/*std::cout << "*** " << std::to_string(WebKitFromBoundary_check(id)) << " ***" << std::endl;*/ Req[id].Method = "POST"; Req[id].bound_flag = 1;}
+    else
+    {   
+        Req[id].bound_flag = 0;
+        Req[id].File_Adr = convert(adr);
+        Req[id].File_type = convert(ftype);
+        Req[id].HTTP_version = convert(HTTP_v);
+        std::cout << "*** " <<Req[id].Method << " ***" << std::endl;
+    }
+    //std::cout << "*** " << Req[id].Method << " : " << std::to_string(WebKitFromBoundary_check(id)) << " ***" << std::endl;
     parse_headers(id);
 }
 
@@ -72,24 +90,32 @@ void parse_headers(int id)
     std::string header;
     std::string body_, b_r;
     std::string::size_type index;
-    while (std::getline(resp, header) && header != "\r") 
+
+    if(Req[id].bound_flag == 1)
+        std::getline(resp, Req[id].WebKitFormBoundary);
+    else
     {
-        index = header.find(':', 0);
-        if(index != std::string::npos) 
+        while (std::getline(resp, header) && header != "\r") 
         {
-            Req[id].Headers.insert(std::make_pair(
-                boost::algorithm::trim_copy(header.substr(0, index)), 
-                boost::algorithm::trim_copy(header.substr(index + 1))
-            ));
+            index = header.find(':', 0);
+            if(index != std::string::npos) 
+            {
+                Req[id].Headers.insert(std::make_pair(
+                    boost::algorithm::trim_copy(header.substr(0, index)), 
+                    boost::algorithm::trim_copy(header.substr(index + 1))
+                ));
+            }
         }
     }
-
     
     while(std::getline(resp, body_))
         b_r += body_;
 
     Req[id].Body = b_r;
-    pick_method(id);
+
+    #ifndef _BUILD_TESTS_
+        pick_method(id);
+    #endif
 }
 
 /**
@@ -124,4 +150,15 @@ std::string convert(std::vector<char> v)
 {
     std::string str(v.begin(), v.end());
     return str;
+}
+
+bool WebKitFromBoundary_check(int id)
+{
+    std::string WebKitPattern = "WebKitFormBoundary";
+
+    if(Req[id].Method != "POST" && Req[id].Method != "GET")
+        if(int pos = Req[id].Method.find(WebKitPattern, 0) > 0)
+            return true;
+    else
+        return false;
 }

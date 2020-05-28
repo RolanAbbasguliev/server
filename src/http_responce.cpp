@@ -58,20 +58,12 @@ void GET_method(int id)
  */
 void POST_method(int id)
 {
-    FILE *F;
-    std::string filename = Req[id].File_Adr; 
+    std::string outfile_name = generate_filename(id);
+    std::ofstream outfile (outfile_name);
 
-    if((F = fopen(filename.c_str(), "rb")) == NULL)
-    {
-        //close(F);
-
-        std::string outfile_name = generate_filename(id);
-        std::ofstream outfile (outfile_name);
-
-        outfile << Req[id].Body;
-
-        //next step: send all this shit to .tmp file and fix parser (405 error in big POSTs)
-    }
+    if(Req[id].bound_flag == 1)
+        outfile << Req[id].WebKitFormBoundary;
+    outfile << Req[id].Body;
 }
 
 /**
@@ -84,10 +76,7 @@ void POST_method(int id)
 std::string generate_filename(int id)
 {
     std::string result;
-
-    //need to add filetype in name generator
-
-    return result = "client_" +  std::to_string(id) + ".tmp";
+    return result = "outfiles/client_" +  std::to_string(id) + ".tmp";
 }
 
 /**
@@ -181,7 +170,7 @@ void create_fstream(std::string filename, int id)
  */
 void content_to_buf(int id)
 {
-    memset(&static_content_buf, sizeof(static_content_buf), 0);
+    memset(&static_content_buf, 0, sizeof(static_content_buf));
 
     Req[id].count_of_r++;
 
@@ -207,7 +196,7 @@ void send_content(int id)
 {
     if(Req[id].status != "wffc" && Req[id].count_of_r < 2)
     { 
-        std::string start = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: ";
+        std::string start = "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Type: ";
         std::string end = "\r\nContent-Transfer-Encoding: binary\r\nContent-Length:";
         int i = 0, j = 0, k = 0;
         

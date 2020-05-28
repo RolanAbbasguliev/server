@@ -1,7 +1,12 @@
-#include "main.h"
+#ifndef _BUILD_TESTS_
+    #include "main.h"
 
-char config_buff[3000]; ///< Buffer for configuration file
-std::map<std::string, std::string> config; ///< Map for pairs param-value from configuration file
+    char config_buff[3000]; ///< Buffer for configuration file
+    std::map<std::string, std::string> config; ///< Map for pairs param-value from configuration file
+#endif
+#ifdef _BUILD_TESTS_
+    #include "unittests_main.h"
+#endif
 
 /**
  * @brief Loading cfg file config.cfg for reading
@@ -13,8 +18,13 @@ void load_cfg_file()
     FILE *F;
     int i = 0, cfg_size = 0;
 
-    if((F = fopen("config.cfg", "rb")) == NULL)
-        actions_log("CONFIG ERROR");
+    #ifndef _BUILD_TESTS_
+        if((F = fopen("config.cfg", "rb")) == NULL)
+            actions_log("CONFIG ERROR");
+    #endif
+    #ifdef _BUILD_TESTS_
+        if((F = fopen("test_conf.cfg", "rb")) == NULL);
+    #endif
 
     memset(&config_buff, 0, sizeof(config_buff));
     
@@ -30,6 +40,7 @@ void load_cfg_file()
     fclose(F);
     parse_cfg_file(cfg_size);
 }
+
 
 /**
  * @brief Parsing config.cfg file
@@ -55,7 +66,9 @@ void parse_cfg_file(int cfg_size)
             param_value.push_back(config_buff[i]);
     }
 
-    exec_cfg();
+    #ifndef _BUILD_TESTS_
+        exec_cfg();
+    #endif
 }
 
 /**
@@ -63,6 +76,7 @@ void parse_cfg_file(int cfg_size)
  * 
  * @return Nothing
  */
+#ifndef _BUILD_TESTS_
 void exec_cfg()
 {
     for(auto it = config.cbegin(); it != config.cend(); ++it)
@@ -77,7 +91,7 @@ void exec_cfg()
             FILES_PATH = it->second;
     }
 }
-
+#endif
 
 /**
  * @brief Converting std::string value to int

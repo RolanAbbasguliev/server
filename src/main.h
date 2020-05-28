@@ -70,13 +70,28 @@ struct LastRequest
     std::string Body;
     std::string status;
     std::ifstream fs;
+    std::string WebKitFormBoundary;
     int bytes_for_send = 0;
     int count_of_r = 0;
+    int bound_flag = 0;
 };
+
+/*struct prev_Method
+{
+    prev_Method()
+    {
+        int socket_id = -1;
+        std::string meth = "";
+        int Boundary_flag = 0;
+    }
+    int socket_id;
+    std::string meth;
+    int Boudary_flag;
+};*/
 
 extern std::map<std::string, std::string> config;
 extern LastRequest *Req;
-extern char buffer_[2049];
+extern char buffer_[4096];
 extern connection_info *conn_info;
 extern pipes *pipe_;
 
@@ -110,3 +125,4 @@ int str_to_int(std::string string);
 void POST_method(int id);
 std::vector<char> useless_func(int i);
 std::string generate_filename(int id);
+bool WebKitFromBoundary_check(int id);

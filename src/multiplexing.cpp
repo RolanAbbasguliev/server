@@ -7,7 +7,7 @@ struct pipes *pipe_ = 0;
 struct connection_info *conn_info = 0;
 struct LastRequest *Req = 0;
 
-char buffer_[2049]; ///< Buffer for incoming requests
+char buffer_[4096]; ///< Buffer for incoming requests
 
 /**
  * @brief Main fuction of the project
@@ -28,7 +28,7 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
     conn_info = new struct connection_info[MAXIMUM_CONNECTIONS];
     Req = new struct LastRequest[MAXIMUM_CONNECTIONS];
     
-    memset(&buffer_, sizeof(buffer_), 0);
+    memset(&buffer_, 0, sizeof(buffer_));
 
 	while(TRUE) 
     {
@@ -50,7 +50,6 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
 
         for(int h = 0; h < MAXIMUM_CONNECTIONS; ++h)
             FD_SET(pipe_[h].fds[0], &readfds);
-        
 
         for(int h = 0; h < MAXIMUM_CONNECTIONS; ++h)
             if(conn_info[h].connection_socket != -1 && Req[h].status == "wffc")
@@ -60,8 +59,8 @@ int multiplexing(int master_socket, int max_clients, int *client_socket, struct 
 
         activity = select( max_sd + 1 , &readfds , &writefds, NULL , NULL);
    
-        if ((activity < 0) && (errno!=EINTR)) 
-            errors_log("SELECT FAILED!");
+        //if ((activity < 0) && (errno!=EINTR)) 
+            //errors_log("SELECT FAILED!");
         
         if (FD_ISSET(master_socket, &readfds)) 
         {
@@ -140,7 +139,7 @@ void send_from_pipe(int id)
 {
     char buf_fds[2048];
 
-    memset(&buf_fds, sizeof(buf_fds), 0);
+    memset(&buf_fds, 0, sizeof(buf_fds));
 
     int cord = read(pipe_[id].fds[0], buf_fds, 1000);
 
